@@ -2,7 +2,10 @@ import xml
 from datetime import datetime
 import xml.dom.minidom
 import time
+import numpy
 import arrow
+from scipy import interpolate
+
 __author__ = 'andriy.batutin'
 
 
@@ -21,13 +24,24 @@ def parseKMLFile():
     collection = DOMTree.documentElement
     track = collection.getElementsByTagName("gx:coord")
     timeDD = collection.getElementsByTagName("when")
-    coordA = []
+    coordX = []
+    coordY = []
     timeA = []
     for element in track:
-        coordA.append(element.childNodes[0].data)
+        (x,y,z) = element.childNodes[0].data.split()
+        (x,y,z) = (float(x), float(y), float(z))
+        coordX.append(x)
+        coordY.append(y)
     for element in timeDD:
         dateTimeStamp = arrow.get(element.childNodes[0].data)
         timeA.append(dateTimeStamp.float_timestamp)
 
-    return (timeA, coordA)
+    return (timeA, coordX, coordY)
 
+def interpPosition(x,y,z, timeToSearch):
+    """
+    >>> (x,y,z) = parseKMLFile()
+    >>> interpPosition(x,y,z, 1420457111.000012)
+    """
+    f = interpolate.interp2d(x, y, z, kind='linear')
+    print f
