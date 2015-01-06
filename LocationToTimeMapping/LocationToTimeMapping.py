@@ -20,7 +20,7 @@ def playground():
     >>> playground()
     """
     (time, x, y) = parseKMLFile()
-    refTime = 1419509129.0
+    refTime = 1419509429.0
     point = interpPosition(time, x, y, refTime)
     print point
 
@@ -78,7 +78,10 @@ def interpPosition(x, y, z, timeToSearch):
     a = Point(y[i1], z[i1])
     b = Point(y[i2], z[i2])
     l = Line(a, b)
-    res = l.midpoint()
+
+    k = abs(x[i1] - timeToSearch) /  abs(x[i1] - x[i2])
+
+    res = l.linerInterpolate(k)
     return res
 
 
@@ -103,6 +106,10 @@ class Line:
     def __init__(self, a, b):
         self.a = a
         self.b = b
+
+    def linerInterpolate(self, k):
+        x, y = (self.a.x + k * (self.b.x - self.a.x)) , (self.a.y + k * (self.b.y - self.a.y))
+        return Point(x, y)
 
     def midpoint(self):
         resX = (self.a.x + self.b.x) * 0.5
