@@ -4,6 +4,7 @@ import xml.dom.minidom
 import time
 import numpy
 import arrow
+import exifread
 from scipy import interpolate
 
 __author__ = 'andriy.batutin'
@@ -20,7 +21,7 @@ def playground():
     >>> playground()
     """
     (time, x, y) = parseKMLFile()
-    refTime = 1419509429.0
+    refTime = readImageMetadata()
     point = interpPosition(time, x, y, refTime)
     print point
 
@@ -83,6 +84,20 @@ def interpPosition(x, y, z, timeToSearch):
 
     res = l.linerInterpolate(k)
     return res
+
+def readImageMetadata():
+    """
+    >>> readImageMetadata()
+    """
+    # Open image file for reading (binary mode)
+    f = open("test2.jpg", 'rb')
+
+    # Return Exif tags
+    tags = exifread.process_file(f)
+    date = arrow.get(tags['Image DateTime'].values, 'YYYY:MM:DD HH:mm:ss')
+
+    timeStamp = date.replace(hours=-1).float_timestamp
+    return timeStamp
 
 
 class Point:
